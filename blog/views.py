@@ -61,12 +61,14 @@ def publish(request):
 			return JsonResponse({"message":"blog published successfully"})
 
 		else:
+			print("elselesejlfjsfd")
 			title = request.POST.get('title')
 			text = request.POST.get('text')
 			summary = request.POST.get('summary')
 			category = request.POST.get('category')
 			user  = Users.objects.filter(id=id).first()
 			author = user.first_name + " " + user.last_name
+			print(author)
 			Blog.objects.create(doc_id=id,title=title,text=text,author=author,img=img,summary=summary,category=category,uploaded=True)
 
 			return JsonResponse({"message":"blog published successfully"})
