@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .navbar {
+            background: #333;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+        .dashboard-btn {
+            background: #5cb85c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .dashboard-btn:hover {
+            background: #4cae4c;
+        }
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: #ffffff; /* White background for a clean look */
+            color: #333333; /* Dark text for readability */
+            padding: 20px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+        }
+        
+        .sidebar h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #333333; /* Ensure header text is dark */
+            border-bottom: 1px solid #dddddd; /* Light gray border */
+            padding-bottom: 10px;
+        }
+        
+        .blog-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .blog-list li {
+            padding: 10px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s, color 0.3s;
+        }
+        
+        .blog-list li:hover {
+            background: #f0f0f0; /* Light gray background on hover */
+            color: #000000; /* Dark text color on hover */
+        }
+        
+        .blog-list a {
+            text-decoration: none;
+            color: inherit; /* Inherit text color from parent */
+            display: block;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            resize: vertical;
+        }
+        .image-upload {
+            margin-bottom: 10px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .save {
+            background: #f0ad4e;
+            color: white;
+        }
+        .delete {
+            background:rgb(238, 6, 6);
+            color: white;
+        }
+        .publish {
+            background: #5cb85c;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="sidebar">
+        <h2 >Your Blogs</h2>
+        <ul class="blog-list">
+            {% for blog in blogs %}
+            <a href="/blog/{{user.id}}/{{blog.id}}/">
+                <li>
+                    {{ blog.title }}
+                </li>
+            </a>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="container">
+        <form id="formdata" method="POST" enctype ="multipart/form-data">
+        {% csrf_token %}
+        <h2>Create a Blog</h2>
+        <input type="text" id="title" name = "title" placeholder="Enter Blog Title" value="{{blogClick.title}}">
+
+        <input type="text" id = "summary" name = "summary" placeholder="Summary" value="{{blogClick.summary}}">
+
+        <input type="text" id = "id" name = "id" value ="{{user.id}}" hidden  >
+
+        <input type="text" id = "blogId" name = "blogId" value ="{{blogClick.id}}" hidden >
+        <select id="category" name="category" >
+            <option value="General" >General</option>
+            <option value="Mental Helth">Mental Helth</option>
+            <option value="Heart Disease">Heart Disease</option>
+            <option value="Immunization">Immunization</option>
+        </select>
+
+
+        <div class="image-upload">
+            <input type="file" id="image" name = "image" accept="image/*" onchange="previewImage(event)">
+            <img id="preview" style="display: none;">
+        </div>
+        
+        <textarea id="content" name="text" placeholder="Write your blog here...">{{blogClick.text}}</textarea>
+        
+        <div class="buttons">
+            <button class="save" type="button" onclick="saveDraft()">Save Draft</button>
+            <button class="delete" type="button" onclick="deleteBlog()">Delete</button>
+            <button class="publish" onclick="publishBlog()">Publish</button> 
+        </div>
+    </form>
+    </div>
+
+    <script>
+        function previewImage(event) {
+            const preview = document.getElementById("preview");
+            preview.src = URL.createObjectURL(event.target.files[0]);
+            let img = document.getElementById("imagefield").value = URL.createObjectURL(event.target.files[0]);
+            preview.style.display = "block";
+        }
+
+
+        function deleteBlog(){
+            let form = document.getElementById("formdata");
+            let formdata = new FormData(form);
+
+            fetch("/delete/",{
+                method : "POST",
+                headers: { 
+                    "X-CSRFToken": getCSRFToken() 
+                },  
+                body : formdata
+            }
+            )
+            .then(response => response.json())  // Convert response to JSON
+            .then(data => {
+                alert("Deleted")
+                window.location.replace("/");
+                
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("responseMsg").innerText = "Failed to fetch data.";
+            });
+
+        }
+
+
+        function saveDraft() {
+            let form = document.getElementById("formdata");
+            let formdata = new FormData(form);
+
+            fetch("/saveDraft/",{
+                method : "POST",
+                headers: { 
+                    "X-CSRFToken": getCSRFToken() 
+                },  
+                body : formdata
+            }
+            
+            )
+            .then(response => response.json())  // Convert response to JSON
+            .then(data => {
+                alert(data.message)
+                reloadPage();
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("responseMsg").innerText = "Failed to fetch data.";
+            });
+            
+
+        }
+        function getCSRFToken() {
+            return document.cookie.split("; ")
+                .find(row => row.startsWith("csrftoken="))
+                ?.split("=")[1];
+        }
+        
+        function publishBlog() {
+        let form = document.getElementById("formdata");
+        
+        let formdata = new FormData(form);
+
+        fetch("/publish/",{
+            method : "POST",
+            headers: { 
+                "X-CSRFToken": getCSRFToken() 
+            },  
+            body : formdata
+        }
+        )
+        .then(response => response.json())  // Convert response to JSON
+        .then(data => {
+            alert("published")
+            window.location.replace("/");
+            
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            document.getElementById("responseMsg").innerText = "Failed to fetch data.";
+        });
+        }
+        
+      
+        function reloadPage() {
+            location.reload();
+        }
+        
+    </script>
+</body>
+</html>

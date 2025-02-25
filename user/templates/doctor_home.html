@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="https://cdn.tailwindcss.com">
 </head>
 <body>
 
@@ -20,9 +21,9 @@
             <div class="col-md-4">
                 <div class="card text-white bg-primary mb-3">
                     <div class="card-body">
-                        <h5 class="card-title">Today's Appointments</h5>
-                        <p class="card-text">You have 0 appointments today.</p>
-                        <a href="#" class="btn btn-light">View Appointments</a>
+                        <h5 class="card-title">Compose a Blog</h5>
+                        <p class="card-text">You can compose blogs from here.</p>
+                        <a href="/blog/{{user.id}}/" class="btn btn-light">Start Writing</a>
                     </div>
                 </div>
             </div>
@@ -30,9 +31,9 @@
             <div class="col-md-4">
                 <div class="card text-white bg-success mb-3">
                     <div class="card-body">
-                        <h5 class="card-title">Total Patients</h5>
-                        <p class="card-text">You have treated 0 patients.</p>
-                        <a href="#" class="btn btn-light">View Patients</a>
+                        <h5 class="card-title">View Your work</h5>
+                        <p class="card-text">These are blogs created by you</p>
+                        <a href="selfblogs/" class="btn btn-light">View Blogs</a>
                     </div>
                 </div>
             </div>
@@ -48,6 +49,7 @@
             </div>
         </div>
 
+    </div>
     </div>
 
 </body>

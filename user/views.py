@@ -4,6 +4,7 @@ from django.template import loader
 from .models import Users
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from blog.models import Blog
 
 def index(request):
     if request.user.is_authenticated:
@@ -57,7 +58,6 @@ def login_user(request):
         if user :
             login(request, user)
             messages.error(request, "Logouted successfuly!.")
-            print(user)
             return redirect("/")
         else:
             messages.error(request, "Invalid Username or Password")
@@ -67,3 +67,20 @@ def login_user(request):
 def logout_user(request):
     logout(request)
     return redirect("/login")
+
+
+def blogs(request):
+    allBlogs = Blog.objects.filter(uploaded = True)
+    categories = allBlogs.values('category').distinct()
+    
+    return render(request,'blogDisplay.html',{"blogs":allBlogs,"category":categories})
+
+def readBlog(request,id):
+    blog = Blog.objects.filter(id=id).first()
+    return render(request,"readBlog.html",{'blog':blog})
+
+def selfblogs(request):
+    allBlogs = Blog.objects.filter(doc_id=request.user.id,uploaded=True)
+    return render(request,'blogDisplay.html',{"blogs":allBlogs})
+
+

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Display</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-4">Blogs</h1>
+        
+        <!-- Category Filter -->
+        <select id="categoryFilter" class="mb-4 p-2 border rounded" onchange="filterBlogs()">
+        <option value="all">All</option>
+
+        {%for cat in category%}
+            <option value="{{cat.category}}">{{cat.category}}</option>
+        {%endfor%}
+        </select>
+        
+        <!-- Blog Container -->
+        <div id="blogContainer">
+            {% for blog in blogs %}
+			<div class="blog-card bg-white p-4 rounded-lg shadow-md mb-4" data-category="{{ blog.category }}">
+                {%if blog.img%}
+				<img src="{{blog.img.url}}" class="w-full h-48 object-cover rounded-lg mb-2">
+                {%endif%}
+                <a href = "{{blog.id}}/"
+				<h2 class="text-xl font-semibold">{{ blog.title }}</h2>
+				<p class="text-gray-600">By {{ blog.author }}</p>
+				<p class="text-gray-600">By {{ blog.summary |truncatewords:15 }}</p>
+				<p class="text-gray-800 mt-2">{{ blog.text |truncatewords:15  }}</p>
+            </a>
+			</div>
+			{% endfor %}
+            <a href="/" class="inline-block mt-6 px-6 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg">
+                Back to Dashboard
+            </a>
+		
+        </div>
+    </div>
+
+    <script>
+        function filterBlogs() {
+            let filterValue = document.getElementById("categoryFilter").value;
+            let blogs = document.querySelectorAll(".blog-card");
+            
+            blogs.forEach(blog => {
+                if (filterValue === "all" || blog.getAttribute("data-category") === filterValue) {
+                    blog.style.display = "block";
+                } else {
+                    blog.style.display = "none";
+                }
+            });
+        }
+        function getCSRFToken() {
+            return document.cookie.split("; ")
+                .find(row => row.startsWith("csrftoken="))
+                ?.split("=")[1];
+        }
+    </script>
+</body>
+</html>
