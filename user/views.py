@@ -34,19 +34,23 @@ def signup(request):
             messages.error(request, "Username already exists")
             return redirect("/signup/")
         
-        Users.objects.create_user(
-            first_name=name[0],
-            last_name=name[1],
-            email=email,
-            address=address,
-            city=city,
-            state=state,
-            pincode=pincode,
-            username=username,
-            usertype=usertype,
-            password=password  
-        )
-        messages.success(request, "Registration successful! You can now log in.")
+        try:
+        
+            Users.objects.create_user(
+                first_name=name[0],
+                last_name=name[1],
+                email=email,
+                address=address,
+                city=city,
+                state=state,
+                pincode=pincode,
+                username=username,
+                usertype=usertype,
+                password=password  
+            )
+            messages.success(request, "Registration successful! You can now log in.")
+        except Exception as e:
+            messages.error(request,e)
         return redirect("/login/")
     return render(request,'signup.html')
 
@@ -57,13 +61,14 @@ def login_user(request):
         user = authenticate(request=request,username=username, password=password)
         if user :
             login(request, user)
-            messages.error(request, "Logouted successfuly!.")
+            # messages.error(request, "Logouted successfuly!.")
             return redirect("/")
         else:
-            messages.error(request, "Invalid Username or Password")
+            # messages.error(request, "Invalid Username or Password")
             return redirect("/login/")
     return render(request,'login.html')
         
+
 def logout_user(request):
     logout(request)
     return redirect("/login")

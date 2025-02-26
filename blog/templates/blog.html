@@ -36,7 +36,7 @@
             background: #4cae4c;
         }
         .sidebar {
-            width: 250px;
+            width:200px;
             height: 100vh;
             background: #ffffff; /* White background for a clean look */
             color: #333333; /* Dark text for readability */
@@ -135,6 +135,10 @@
             background:rgb(238, 6, 6);
             color: white;
         }
+        .dash {
+            background:rgb(108, 203, 247);
+            color: white;
+        }
         .publish {
             background: #5cb85c;
             color: white;
@@ -146,6 +150,9 @@
     <div class="sidebar">
         <h2 >Your Blogs</h2>
         <ul class="blog-list">
+            {%if not blogs%}
+            <li> Start Writing</li>
+            {%endif%}
             {% for blog in blogs %}
             <a href="/blog/{{user.id}}/{{blog.id}}/">
                 <li>
@@ -160,13 +167,13 @@
         <form id="formdata" method="POST" enctype ="multipart/form-data">
         {% csrf_token %}
         <h2>Create a Blog</h2>
-        <input type="text" id="title" name = "title" placeholder="Enter Blog Title" value="{{blogClick.title}}">
+        <input type="text" id="title" name = "title" placeholder="Enter Blog Title" value="{{blogClick.title}}" >
 
         <input type="text" id = "summary" name = "summary" placeholder="Summary" value="{{blogClick.summary}}">
 
         <input type="text" id = "id" name = "id" value ="{{user.id}}" hidden  >
 
-        <input type="text" id = "blogId" name = "blogId" value ="{{blogClick.id}}" hidden >
+        <input type="text" id = "blogId" name = "blogId" value ="{{blogClick.id}}" hidden value='0' >
         <select id="category" name="category" >
             <option value="General" >General</option>
             <option value="Mental Helth">Mental Helth</option>
@@ -183,8 +190,9 @@
         <textarea id="content" name="text" placeholder="Write your blog here...">{{blogClick.text}}</textarea>
         
         <div class="buttons">
-            <button class="save" type="button" onclick="saveDraft()">Save Draft</button>
+            <button class="dash" type="button" onclick="returnToDesk()">Back to Dashboar</button>
             <button class="delete" type="button" onclick="deleteBlog()">Delete</button>
+            <button class="save" type="button" onclick="saveDraft()">Save Draft</button>
             <button class="publish" onclick="publishBlog()">Publish</button> 
         </div>
     </form>
@@ -198,10 +206,15 @@
             preview.style.display = "block";
         }
 
+        function returnToDesk(){
+            window.location.replace("/")
+        }
+
 
         function deleteBlog(){
             let form = document.getElementById("formdata");
             let formdata = new FormData(form);
+            
 
             fetch("/delete/",{
                 method : "POST",
@@ -214,12 +227,10 @@
             .then(response => response.json())  // Convert response to JSON
             .then(data => {
                 alert("Deleted")
-                window.location.replace("/");
-                
+                reloadPage()                
             })
             .catch(error => {
                 console.error("Error:", error);
-                document.getElementById("responseMsg").innerText = "Failed to fetch data.";
             });
 
         }
@@ -228,6 +239,24 @@
         function saveDraft() {
             let form = document.getElementById("formdata");
             let formdata = new FormData(form);
+
+
+            let title = formdata.get("title").trim();
+            let summary = formdata.get("summary").trim();
+            let content = formdata.get("text").trim();
+
+            if(!title){
+                alert("Please enter title")
+                return
+            }
+            if(!summary){
+                alert("Please enter Summary")
+                return
+            }
+            if(!content){
+                alert("Please enter Content")
+                return
+            }
 
             fetch("/saveDraft/",{
                 method : "POST",
@@ -238,14 +267,13 @@
             }
             
             )
-            .then(response => response.json())  // Convert response to JSON
+            .then(response => response.json())  
             .then(data => {
                 alert(data.message)
                 reloadPage();
             })
             .catch(error => {
                 console.error("Error:", error);
-                document.getElementById("responseMsg").innerText = "Failed to fetch data.";
             });
             
 

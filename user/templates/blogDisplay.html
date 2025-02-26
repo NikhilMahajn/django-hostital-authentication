@@ -28,9 +28,10 @@
                 {%endif%}
                 <a href = "{{blog.id}}/"
 				<h2 class="text-xl font-semibold">{{ blog.title }}</h2>
+                <br>
 				<p class="text-gray-600">By {{ blog.author }}</p>
-				<p class="text-gray-600">By {{ blog.summary |truncatewords:15 }}</p>
-				<p class="text-gray-800 mt-2">{{ blog.text |truncatewords:15  }}</p>
+				<p class="text-gray-600">{{ blog.summary |truncatewords:15 }}</p>
+				<h6 class="text-gray-800 mt-2">{{ blog.text |truncatewords:15  }}</h6>
             </a>
 			</div>
 			{% endfor %}

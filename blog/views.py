@@ -10,26 +10,48 @@ from .models import Blog
 # Create your views here.
 
 def blog(request,id,bid=None):
-	user = Users.objects.filter(id=id).first()
-	blogs = Blog.objects.filter(doc_id=id,uploaded=False)
+	try:
+		user = Users.objects.filter(id=id).first()
+		blogs = Blog.objects.filter(doc_id=id,uploaded=False)
+	except Exception as e:
+		return JsonResponse({"message",e})
 	return render(request,'blog.html',{"user":user,"blogs":blogs,"blogClick":None})
 
 def savedraft(request):
 	if request.method == 'POST':
-		id = request.POST.get('id')
-		title = request.POST.get('title')
-		text = request.POST.get('text')
-		img = request.FILES.get('img')
-		summary = request.POST.get('summary')
-		category = request.POST.get('category')
-		print(id)
-		
-		user  = Users.objects.filter(id=id).first()
-		author = user.first_name + " " + user.last_name
-		print(author)
-		Blog.objects.create(doc_id=id,title=title,text=text,author=author,img=img,summary=summary,category=category,uploaded=False)
-		# # messages.success(request,"draft saved successfully")
-		return JsonResponse({"message":"draft saved successfully"})
+		try:
+			# id = request.POST.get('id')
+			id = request.user.id
+			bid = request.POST.get('blogId')
+			title = request.POST.get('title')
+			text = request.POST.get('text')
+			img = request.FILES.get('img')
+			summary = request.POST.get('summary')
+			category = request.POST.get('category')
+			blog = None
+			if bid:
+				blog = Blog.objects.filter(id=bid).first()
+
+			if blog:
+				print("blog present")
+				blog.title = title
+				blog.summary = summary
+				blog.img = img
+				blog.category = category
+				blog.text = text
+
+				blog.save()
+
+				return JsonResponse({"message": "Draft updated successfully!"})
+			else:
+				user  = Users.objects.filter(id=id).first()
+				author = user.first_name + " " + user.last_name
+				Blog.objects.create(doc_id=id,title=title,text=text,author=author,img=img,summary=summary,category=category,uploaded=False)
+				return JsonResponse({"message": "Draft saved successfully!"})
+
+		except Exception as e:
+			print(e)
+			return JsonResponse({'message':e})
 	return render(request,'blog.html')
 
 
@@ -45,34 +67,31 @@ def loadDraft(request, id, blogId):
     })
 
 def publish(request):
-	if request.method == 'POST':
-		print("publishingg............")
-		id = request.POST.get('id')
-		blogId = request.POST.get('blogId')
-		img = request.FILES.get('image')
-		print(img)
+	try:
+		if request.method == 'POST':
+			id = request.POST.get('id')
+			blogId = request.POST.get('blogId')
+			img = request.FILES.get('image')
 
-		if blogId:
-			blog = Blog.objects.filter(id=blogId).first()
-			blog.img = img
-			blog.uploaded = True
-			
-			blog.save()
-			return JsonResponse({"message":"blog published successfully"})
+			if blogId:
+				blog = Blog.objects.filter(id=blogId).first()
+				blog.img = img
+				blog.uploaded = True
+				blog.save()
+				return JsonResponse({"message":"blog published successfully"})
 
-		else:
-			print("elselesejlfjsfd")
-			title = request.POST.get('title')
-			text = request.POST.get('text')
-			summary = request.POST.get('summary')
-			category = request.POST.get('category')
-			user  = Users.objects.filter(id=id).first()
-			author = user.first_name + " " + user.last_name
-			print(author)
-			Blog.objects.create(doc_id=id,title=title,text=text,author=author,img=img,summary=summary,category=category,uploaded=True)
+			else:
+				title = request.POST.get('title')
+				text = request.POST.get('text')
+				summary = request.POST.get('summary')
+				category = request.POST.get('category')
+				user  = Users.objects.filter(id=id).first()
+				author = user.first_name + " " + user.last_name
+				Blog.objects.create(doc_id=id,title=title,text=text,author=author,img=img,summary=summary,category=category,uploaded=True)
 
-			return JsonResponse({"message":"blog published successfully"})
-	print("not post request")
+				return JsonResponse({"message":"blog published successfully"})
+	except Exception as e:
+		return JsonResponse({"message":e})
 	return render(request,'blog.html')
 
 def delete(request):
